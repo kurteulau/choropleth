@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>US Pop Density</title>
+        <script src='https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js'></script>
+        <link href='https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css' rel='stylesheet' />
+        <link href="stylesheet.css" rel="stylesheet" >
+        <script> mapboxgl.accessToken = 'pk.eyJ1Ijoia3VydGV1bGF1IiwiYSI6ImNrc295eWE1YjAwdTIyd3BneWVsYXYyaWgifQ.TeLO93qIulup3r4DPe-hUg' </script>
+    </head>
+    <body>
+        <div id='map'></div>
+        <div class='map-overlay' id='features'>
+            <h2>US population density</h2>
+            <div id='pd'>
+                <p>Hover over a state to see density in people per square mile</p>
+            </div>
+        </div>
+        <div class='map-overlay' id='legend'>
+            <p>People per square mile</p>
+        </div>
+
+        <script>
+            var map = new mapboxgl.Map({
+            container: 'map', 
+            style: 'mapbox://styles/kurteulau/cksoxyj723avd17o90s6s1cuy',
+            center: [-95, 40], // long, lat
+            zoom: 3 
+            });
+
+            map.on('load', function() {
+                map.getCanvas().style.cursor = 'default';
+                map.fitBounds([[-133.2421875, 16.972741], [-47.63671875, 52.696361]]);
+
+                var layers = ['0-10', '10-20', '20-50', '50-100', '100-200', '200-500', '500-1000', '1000+'];
+                var colors = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026'];
+
+                for (i = 0; i < layers.length; i++) {
+                    var layer = layers[i];
+                    var color = colors[i];
+                    var item = document.createElement('div');
+                    var key = document.createElement('span');
+                    key.className = 'legend-key';
+                    key.style.backgroundColor = color;
+
+                    var value = document.createElement('span');
+                    value.innerHTML = layer;
+                    item.appendChild(key);
+                    item.appendChild(value);
+                    legend.appendChild(item);
+                }
+                
+                map.on('mousemove', function(e) {
+                    var states = map.queryRenderedFeatures(e.point, {
+                        layers: ['statedata']
+                    });
+
+                    if (states.length > 0) {
+                        document.getElementById('pd').innerHTML = 
+                            '<h3><strong>' 
+                                + states[0].properties.name 
+                                + '</strong></h3><p><strong><em>' 
+                                + states[0].properties.density 
+                                + '</strong> people per square mile</em></p>';
+                    } else {
+                        document.getElementById('pd').innerHTML = 
+                        '<p>Hover over a state to see density in people per square mile</p>';
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
